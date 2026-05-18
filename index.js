@@ -4,9 +4,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
+// YENİ: Oyun bölüm verilerimizi (data/levels.js) içeri aktarıyoruz
+const levelsData = require('./Data/levels');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
+// CORS ayarı: Tüm cihazlardan gelen isteklere izin verir
 app.use(cors());
 app.use(express.json());
 
@@ -32,6 +36,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+// Sunucu Durumu Kontrol Kapısı
 app.get('/', (req, res) => {
   const state = mongoose.connection.readyState;
   const states = {
@@ -46,6 +51,19 @@ app.get('/', (req, res) => {
   });
 });
 
+// YENİ: Oyun Bölümlerini Servis Eden Kapı (Endpoint)
+app.get('/api/levels/:levelId', (req, res) => {
+  const levelId = req.params.levelId;
+  const level = levelsData[levelId];
+
+  if (level) {
+    res.json(level); // Bölüm bulunduysa telefona yolla
+  } else {
+    res.status(404).json({ error: 'Bölüm bulunamadı.' });
+  }
+});
+
+// Kayıt Ol Kapısı
 app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -78,6 +96,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// Giriş Yap Kapısı
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -105,6 +124,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Backend server is running on port ${port}`);
+// DEĞİŞTİRİLDİ: Telefonların bağlanabilmesi için '0.0.0.0' IP'si eklendi
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Backend server is running on port ${port} (0.0.0.0 üzerinden her cihaza açık)`);
 });
