@@ -1,22 +1,16 @@
 version: '3.8'
 
 services:
-  backend:
-    build: .
-    ports:
-      - "3000:3000"
+  oyun-db:
+    image: postgres:15
     environment:
-      - MONGO_URI=mongodb://mongo_db:27017/cengel_db
-      - JWT_SECRET=super_secret_cengel_key
-    depends_on:
-      - mongo_db
-
-  mongo_db:
-    image: mongo:latest
+      POSTGRES_PASSWORD: sifre123
+      POSTGRES_DB: oyun_veritabani
+      POSTGRES_USER: oyun_admin
     ports:
-      - "27018:27017"
+      - "27018:5432"
     volumes:
-      - mongodata:/data/db
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  mongodata:
+  pgdata:
